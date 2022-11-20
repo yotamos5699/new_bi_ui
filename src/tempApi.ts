@@ -23,15 +23,23 @@ export async function getReportData() {
     redirect: "follow",
   };
 
-  return await fetch("http://localhost:3000/api/flexdoc", requestOptions)
-    .then((response) => response.json())
+  let dataUrl = "https://bizbi-server.onrender.com/api/flexdoc";
+  // let dataUrl = "http://localhost:3333/api/flexdoc";
+
+  return await fetch(dataUrl, requestOptions)
+    .then((response) => {
+      console.log({ response });
+      return response.json();
+    })
+    .then((res) => {
+      console.log({ res });
+      return res;
+    })
 
     .catch((error) => console.log("error", error));
   //doGet(res);
 }
 
 export const fetchData = (url: string) => {
-  return  fetch(url, { mode: "no-cors" }).then((res) => res.json());
+  return fetch(url, { mode: "no-cors" }).then((res) => res.json());
 };
-
-

@@ -1,7 +1,9 @@
+//import "./index.css";
 import { useEffect, useState } from "react";
 import CastumBarChart from "./components/BarChart";
 import Model from "./components/Model";
 import Select from "./components/Select";
+
 import { getReportData } from "./tempApi";
 import { PivotData, chartsPivot } from "./typing.d";
 
@@ -9,7 +11,11 @@ const formatChartsData = async (keys: string[], data: any, pivot: PivotData | an
   let hashTable: { [key: string]: number } = {};
   let filtedData: any = [];
   for (let i = 0; i <= data.length - 1; i++) {
-    if (data[i]["תאריך"] > pivot.startinDate && data[i]["תאריך"] < pivot.endingDate) filtedData.push(data[i]);
+    let dateString = data[i]["תאריך"];
+    //  console.log({ dateString });
+    if (new Date(dateString) > new Date(pivot.startinDate) && new Date(dateString) < new Date(pivot.endingDate))
+      console.log("in if statment");
+    filtedData.push(data[i]);
   }
   console.log({ filtedData });
   for (let i = 0; i <= keys.length - 1; i++) {
@@ -17,10 +23,12 @@ const formatChartsData = async (keys: string[], data: any, pivot: PivotData | an
   }
 
   for (let i = 0; i <= filtedData.length - 1; i++) {
+    console.log(hashTable);
     hashTable[filtedData[i][pivot.pivotKey]] =
       hashTable[filtedData[i][pivot.pivotKey]] + -filtedData[i]["סה&quot;כ בתנועה"];
   }
   console.log(hashTable);
+  console.log({ hashTable });
   return hashTable;
 };
 
@@ -37,7 +45,7 @@ function App() {
   useEffect(() => {
     getReportData()
       .then((res) => {
-        console.log(res);
+        console.log({ res });
         setData(res.status.repdata);
       })
       .then(() => {
@@ -83,7 +91,7 @@ function App() {
 
   return (
     <div>
-      <div className="flex text-3xl">
+      <div className="flex bg-slate-500">
         <Select handleSelect={handleSelect} setPivot={setPivot} pivot={pivot} />
         <div className="flex flex-col">
           <label>תאריך התחלה</label>
@@ -101,7 +109,7 @@ function App() {
           הפק
         </button>
       </div>
-      <div className="flex bg-lime-500 text-4xl">
+      {/* <div className="flex bg-lime-500 text-4xl">
         <div className="flex flex-col px-7 py-5 ">
           <label>מפתח חיפוש</label>
           <p>{pivot?.pivotKey}</p>
@@ -114,12 +122,13 @@ function App() {
           <label>תאריך סיום</label>
           <p>{pivot?.endingDate}</p>
         </div>
-      </div>
+      </div> */}
 
       <div>{itemsNames}</div>
       <CastumBarChart hashTable={chartsData} />
 
       {visible && <Model handleClick={handleClick} />}
+      <div></div>
     </div>
   );
 }

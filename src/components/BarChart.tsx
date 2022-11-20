@@ -7,45 +7,45 @@ type unit = {
   name: string;
   sum: number;
 };
-const data = [
-  {
-    name: "XP100",
-    sum: 600000,
-  },
-  {
-    name: "SP250",
-    sum: 3000,
-  },
-  {
-    name: "KIMBO",
-    sum: 200000,
-  },
-  {
-    name: "AB260",
-    sum: 140000,
-  },
-  {
-    name: "SR",
-    sum: 1000000,
-  },
-  {
-    name: "SP",
-    sum: 2390,
-  },
-  {
-    name: "PP",
-    sum: 600,
-  },
-  { name: "SX250SA", sum: 13370 },
-];
+// const data = [
+//   {
+//     name: "XP100",
+//     sum: 600000,
+//   },
+//   {
+//     name: "SP250",
+//     sum: 3000,
+//   },
+//   {
+//     name: "KIMBO",
+//     sum: 200000,
+//   },
+//   {
+//     name: "AB260",
+//     sum: 140000,
+//   },
+//   {
+//     name: "SR",
+//     sum: 1000000,
+//   },
+//   {
+//     name: "SP",
+//     sum: 2390,
+//   },
+//   {
+//     name: "PP",
+//     sum: 600,
+//   },
+//   { name: "SX250SA", sum: 13370 },
+// ];
 const CastumBarChart: React.FC<barChartProps> = ({ hashTable }) => {
-  // let data: unit[] = [];
-  // Object.keys(hashTable).forEach((key) =>
-  //   data.push({
-  //     name: key,
-  //     sum: hashTable[key],
-  //   })
-  // );
+  let data: unit[] = [];
+  Object.keys(hashTable).forEach((key) =>
+    data.push({
+      name: key,
+      sum: hashTable[key],
+    })
+  );
   console.log("data in bar chart ", data);
 
   return (
