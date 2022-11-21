@@ -1,5 +1,5 @@
 //import "./index.css";
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import CastumBarChart from "./components/BarChart";
 import Model from "./components/Model";
 import Select from "./components/Select";
@@ -66,7 +66,7 @@ function App() {
   const [visible, setVisible] = useState<boolean>(false);
   const [chartsData, setChartsData] = useState<object>({});
   const [load, setLoad] = useState<boolean>(true);
-  //const [currentData, setCurrentData] = useState<any>();
+  const [currentData, setCurrentData] = useState<any>();
 
   useEffect(() => {
     getReportData()
@@ -87,6 +87,7 @@ function App() {
       let filterdData = await formatChartsData(data, pivot);
       console.log({ filterdData });
       let filterdItems = await filterItemList(filterdData, pivot.pivotKey);
+      setCurrentData(filterdData);
       setItemsNames(() => filterdItems);
       /*@ts-ignore */
       let HashTable = await makeHashTable(
@@ -161,27 +162,39 @@ function App() {
           הפק
         </button>
       </div>
-      {/* <div className="flex bg-lime-500 text-4xl">
-        <div className="flex flex-col px-7 py-5 ">
-          <label>מפתח חיפוש</label>
-          <p>{pivot?.pivotKey}</p>
-        </div>
-        <div className="flex flex-col px-7 py-5 ">
-          <label>תאריך התחלה</label>
-          <p>{pivot?.startinDate}</p>
-        </div>
-        <div className="flex flex-col px-7 py-5 ">
-          <label>תאריך סיום</label>
-          <p>{pivot?.endingDate}</p>
-        </div>
-      </div> */}
-
-      <div>{itemsNames}</div>
       {!load ? (
         <CastumBarChart hashTable={chartsData} />
       ) : (
         <h1 className={"text-xl8 text-center"}> טוען אינעל דינק ......</h1>
       )}
+      {currentData && (
+        <table className="table-auto">
+          <thead className="bg-white border-b">
+            <tr className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
+              {Object.keys(currentData[0]).map((header) => (
+                <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+                  {header}
+                </td>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {currentData.map(
+              (row: { [s: string]: ReactNode } | ArrayLike<ReactNode>) => (
+                <tr className="bg-gray-100 border-b">
+                  {Object.values(row).map((cell) => (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              )
+            )}
+            <tr></tr>
+          </tbody>
+        </table>
+      )}
+
       {visible && <Model handleClick={handleClick} />}
       <div></div>
     </div>
