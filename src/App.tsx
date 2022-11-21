@@ -1,5 +1,5 @@
 //import "./index.css";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import CastumBarChart from "./components/BarChart";
 import Model from "./components/Model";
 import Select from "./components/Select";
@@ -14,16 +14,16 @@ const formatChartsData = async (data: any, pivotData: PivotData | any) => {
     let thisDate = new Date(dateString).getTime();
     let endT = new Date(pivotData.endingDate).getTime();
     let startT = new Date(pivotData.startinDate).getTime();
-    console.log({ thisDate, startT, endT });
+    // console.log({ thisDate, startT, endT });
     //  console.log({ dateString });
-    console.log(
-      "this > start",
-      thisDate > startT,
-      "this < end date ",
-      thisDate < endT
-    );
-    if (thisDate > startT && thisDate < endT) {
-      console.log("in if statment");
+    let currentCard = data[i]["לקוח/ספק"];
+    if (
+      thisDate > startT &&
+      thisDate < endT &&
+      currentCard > "6024" &&
+      currentCard < "7000"
+    ) {
+      // console.log("in if statment");
       filtedData.push(data[i]);
     }
   }
@@ -36,18 +36,22 @@ const makeHashTable = async (
   key: string | "פריט"
 ) => {
   let hashTable: { [key: string]: number } = {};
-  console.log({ FilterdData });
+  // console.log({ FilterdData });
   for (let i = 0; i <= keys.length - 1; i++) {
     hashTable[keys[i]] = 0;
   }
 
   for (let i = 0; i <= FilterdData.length - 1; i++) {
-    //   console.log(hashTable);
-    hashTable[FilterdData[i][key]] =
-      hashTable[FilterdData[i][key]] + -FilterdData[i]["סה&quot;כ בתנועה"];
+    //console.log(hashTable);
+    // let hashCurrentValue = hashTable[FilterdData[i][key]];
+    //  let tableAddedValue = FilterdData[i]["סה&quot;כ בתנועה"];
+    // let keyid = FilterdData[i][key];
+    // console.log({ hashCurrentValue, tableAddedValue, keyid });
+    // console.log();
+    hashTable[FilterdData[i][key]] += -FilterdData[i]["סה&quot;כ בתנועה"];
   }
   //console.log(hashTable);
-  console.log({ hashTable });
+  // console.log({ hashTable });
   return hashTable;
 };
 
@@ -85,7 +89,7 @@ function App() {
     if (checkPivotData()) {
       console.log("data ok in select");
       let filterdData = await formatChartsData(data, pivot);
-      console.log({ filterdData });
+      //  console.log({ filterdData });
       let filterdItems = await filterItemList(filterdData, pivot.pivotKey);
       setCurrentData(filterdData);
       setItemsNames(() => filterdItems);
@@ -97,7 +101,7 @@ function App() {
       );
       setChartsData(HashTable);
     }
-    console.log("chart data ", chartsData);
+    // console.log("chart data ", chartsData);
     return false;
   };
   const checkPivotData = () => {
@@ -108,6 +112,7 @@ function App() {
     return isOk;
   };
   const handleSelect = async (e: any) => {
+    console.log("data 0 exem ^^^^^^", data[0]);
     let value = e.target.value;
     let name = e.target.name;
     console.log({ value, name });
@@ -118,7 +123,7 @@ function App() {
     console.log("select ", e.target.name);
     if (name == "end") setPivot((prev) => ({ ...prev, endingDate: value }));
     if (name == "start") setPivot((prev) => ({ ...prev, startinDate: value }));
-    console.log({ pivot });
+    // console.log({ pivot });
     // await updateTable();
   };
 
