@@ -1,5 +1,5 @@
 //import "./index.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CastumBarChart from "./components/BarChart";
 import Model from "./components/Model";
 import Select from "./components/Select";
@@ -7,29 +7,52 @@ import Select from "./components/Select";
 import { getReportData } from "./tempApi";
 import { PivotData, chartsPivot } from "./typing.d";
 
-const formatChartsData = async (keys: string[], data: any, pivot: PivotData | any) => {
-  let hashTable: { [key: string]: number } = {};
+const formatChartsData = async (data: any, pivotData: PivotData | any) => {
   let filtedData: any = [];
   for (let i = 0; i <= data.length - 1; i++) {
     let dateString = data[i]["תאריך"];
+    let thisDate = new Date(dateString).getTime();
+    let endT = new Date(pivotData.endingDate).getTime();
+    let startT = new Date(pivotData.startinDate).getTime();
+    console.log({ thisDate, startT, endT });
     //  console.log({ dateString });
-    if (new Date(dateString) > new Date(pivot.startinDate) && new Date(dateString) < new Date(pivot.endingDate))
+    console.log(
+      "this > start",
+      thisDate > startT,
+      "this < end date ",
+      thisDate < endT
+    );
+    if (thisDate > startT && thisDate < endT) {
       console.log("in if statment");
-    filtedData.push(data[i]);
+      filtedData.push(data[i]);
+    }
   }
-  console.log({ filtedData });
+  return filtedData;
+};
+
+const makeHashTable = async (
+  FilterdData: any,
+  keys: any,
+  key: string | "פריט"
+) => {
+  let hashTable: { [key: string]: number } = {};
+  console.log({ FilterdData });
   for (let i = 0; i <= keys.length - 1; i++) {
     hashTable[keys[i]] = 0;
   }
 
-  for (let i = 0; i <= filtedData.length - 1; i++) {
-    console.log(hashTable);
-    hashTable[filtedData[i][pivot.pivotKey]] =
-      hashTable[filtedData[i][pivot.pivotKey]] + -filtedData[i]["סה&quot;כ בתנועה"];
+  for (let i = 0; i <= FilterdData.length - 1; i++) {
+    //   console.log(hashTable);
+    hashTable[FilterdData[i][key]] =
+      hashTable[FilterdData[i][key]] + -FilterdData[i]["סה&quot;כ בתנועה"];
   }
-  console.log(hashTable);
+  //console.log(hashTable);
   console.log({ hashTable });
   return hashTable;
+};
+
+const filterItemList = async (data: object[], key: string = "פריט") => {
+  return [...new Set(data.map((row: any) => row[key]))];
 };
 
 function App() {
@@ -39,22 +62,43 @@ function App() {
     endingDate: undefined,
     pivotKey: undefined,
   });
-  const [itemsNames, setItemsNames] = useState([]);
+  const [itemsNames, setItemsNames] = useState<any[]>();
   const [visible, setVisible] = useState<boolean>(false);
   const [chartsData, setChartsData] = useState<object>({});
+  const [load, setLoad] = useState<boolean>(true);
+  //const [currentData, setCurrentData] = useState<any>();
+
   useEffect(() => {
     getReportData()
       .then((res) => {
-        console.log({ res });
+        //  console.log({ res });
         setData(res.status.repdata);
       })
       .then(() => {
-        console.log({ data });
+        // console.log({ data });
       });
 
     return console.log("clean up");
   }, []);
 
+  const updateTable = async () => {
+    if (checkPivotData()) {
+      console.log("data ok in select");
+      let filterdData = await formatChartsData(data, pivot);
+      console.log({ filterdData });
+      let filterdItems = await filterItemList(filterdData, pivot.pivotKey);
+      setItemsNames(() => filterdItems);
+      /*@ts-ignore */
+      let HashTable = await makeHashTable(
+        filterdData,
+        itemsNames,
+        pivot.pivotKey ? pivot.pivotKey : "פריט"
+      );
+      setChartsData(HashTable);
+    }
+    console.log("chart data ", chartsData);
+    return false;
+  };
   const checkPivotData = () => {
     let isOk = true;
     Object.values(pivot).find((value) => {
@@ -62,12 +106,11 @@ function App() {
     });
     return isOk;
   };
-  const handleSelect = (e: any) => {
+  const handleSelect = async (e: any) => {
     let value = e.target.value;
     let name = e.target.name;
     console.log({ value, name });
     if (name == "select") {
-      setItemsNames([...new Set(data.map((row) => row[chartsPivot[value]]))]);
       console.log({ itemsNames });
       setPivot((prev) => ({ ...prev, pivotKey: chartsPivot[value] }));
     }
@@ -75,31 +118,40 @@ function App() {
     if (name == "end") setPivot((prev) => ({ ...prev, endingDate: value }));
     if (name == "start") setPivot((prev) => ({ ...prev, startinDate: value }));
     console.log({ pivot });
+    // await updateTable();
   };
 
   const handleClick = async (e: any) => {
     console.log("e taerget ", e.target);
     let isPivotDataOk = checkPivotData();
     console.log({ isPivotDataOk });
-    if (e.target.name == "submit" && isPivotDataOk === false) setVisible((prev) => !prev);
+    if (e.target.name == "submit" && isPivotDataOk === false)
+      setVisible((prev) => !prev);
     else {
-      let cData = await formatChartsData(itemsNames, data, pivot);
-      setChartsData(cData);
+      setLoad(true);
+      setLoad(await updateTable());
+      console.log({ load });
+
+      //  let cData = await formatChartsData(data, pivot);
+      //  setChartsData(cData);
+      console.log("data ok++");
     }
-    if (e.target?.id == "pop_up" || e.taerget?.id == "pop_up_text") setVisible((prev) => !prev);
+    if (e.target?.id == "pop_up" || e.taerget?.id == "pop_up_text")
+      setVisible((prev) => !prev);
   };
 
   return (
     <div>
       <div className="flex bg-slate-500">
         <Select handleSelect={handleSelect} setPivot={setPivot} pivot={pivot} />
-        <div className="flex flex-col">
-          <label>תאריך התחלה</label>
-          <input name="start" type="date" onChange={handleSelect} />
-        </div>
+
         <div className="flex flex-col">
           <label>תאריך סיום</label>
           <input name="end" type="date" onChange={handleSelect} />
+        </div>
+        <div className="flex flex-col">
+          <label>תאריך התחלה</label>
+          <input name="start" type="date" onChange={handleSelect} />
         </div>
         <button
           name="submit"
@@ -125,8 +177,11 @@ function App() {
       </div> */}
 
       <div>{itemsNames}</div>
-      <CastumBarChart hashTable={chartsData} />
-
+      {!load ? (
+        <CastumBarChart hashTable={chartsData} />
+      ) : (
+        <h1 className={"text-xl8 text-center"}> טוען אינעל דינק ......</h1>
+      )}
       {visible && <Model handleClick={handleClick} />}
       <div></div>
     </div>
