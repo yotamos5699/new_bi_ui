@@ -7,51 +7,79 @@ import Select from "./components/Select";
 import { getReportData } from "./tempApi";
 import { PivotData, chartsPivot } from "./typing.d";
 
+const castuner_agent = [
+  { castumer: "6313", agent: 1 },
+  { castumer: "6314", agent: 1 },
+  { castumer: "6315", agent: 1 },
+  { castumer: "6316", agent: 1 },
+  { castumer: "6234", agent: 2 },
+  { castumer: "6238", agent: 2 },
+  { castumer: "6253", agent: 2 },
+  { castumer: "6256", agent: 2 },
+  { castumer: "6258", agent: 2 },
+  { castumer: "6293", agent: 2 },
+  { castumer: "6312", agent: 2 },
+  { castumer: "6323", agent: 2 },
+  { castumer: "6325", agent: 2 },
+  { castumer: "6326", agent: 2 },
+  { castumer: "6328", agent: 2 },
+  { castumer: "6329", agent: 2 },
+];
+
 const formatChartsData = async (data: any, pivotData: PivotData | any) => {
   let filtedData: any = [];
   for (let i = 0; i <= data.length - 1; i++) {
     let dateString = data[i]["תאריך"];
     let thisDate = new Date(dateString).getTime();
-    let endT = new Date(pivotData.endingDate).getTime();
-    let startT = new Date(pivotData.startinDate).getTime();
-    // console.log({ thisDate, startT, endT });
-    //  console.log({ dateString });
+    let END_TIME = new Date(pivotData.endingDate).getTime();
+    let START_TIME = new Date(pivotData.startinDate).getTime();
+
     let currentCard = data[i]["לקוח/ספק"];
-    if (
-      thisDate > startT &&
-      thisDate < endT &&
-      currentCard > "6024" &&
-      currentCard < "7000"
-    ) {
-      // console.log("in if statment");
+
+    if (thisDate >= START_TIME && thisDate <= END_TIME && currentCard > "6024" && currentCard < "7000") {
       filtedData.push(data[i]);
     }
   }
+
+  //TEMP
+  if (pivotData?.pivotKey == "סוכן") {
+    let tempData = [];
+    for (let i = 0; i <= filtedData.length - 1; i++) {
+      let didFind = false;
+      for (let j = 0; j <= castuner_agent.length - 1; j++) {
+        if (filtedData[i]["לקוח/ספק"] == castuner_agent[j].castumer) {
+          tempData.push({ ...filtedData[i], סוכן: castuner_agent[j].agent });
+          didFind = true;
+        }
+      }
+      if (!didFind && filtedData[i]["סוכן"] != 0) tempData.push(filtedData[i]);
+    }
+    console.log({ tempData });
+    return tempData;
+  }
+
+  /* the reaL DEAL !!!!!!!!!!!!!!!!!*/
+  // let AgentData = [];
+  // if (pivotData?.pivotKey == "סוכן") {
+  //   AgentData = filtedData.filter((row: any) => row["סוכן"] != 0);
+  //   return AgentData;
+  // }
+  // console.log({ AgentData });
   return filtedData;
 };
 
-const makeHashTable = async (
-  FilterdData: any,
-  keys: any,
-  key: string | "פריט"
-) => {
+const makeHashTable = async (FilterdData: any, keys: any, key: string | "פריט") => {
   let hashTable: { [key: string]: number } = {};
-  // console.log({ FilterdData });
+
   for (let i = 0; i <= keys.length - 1; i++) {
     hashTable[keys[i]] = 0;
   }
 
+  let sortKey = key == "סוכן" ? "כמות מקורית" : "סה&quot;כ בתנועה";
   for (let i = 0; i <= FilterdData.length - 1; i++) {
-    //console.log(hashTable);
-    // let hashCurrentValue = hashTable[FilterdData[i][key]];
-    //  let tableAddedValue = FilterdData[i]["סה&quot;כ בתנועה"];
-    // let keyid = FilterdData[i][key];
-    // console.log({ hashCurrentValue, tableAddedValue, keyid });
-    // console.log();
-    hashTable[FilterdData[i][key]] += -FilterdData[i]["סה&quot;כ בתנועה"];
+    hashTable[FilterdData[i][key]] += -FilterdData[i][sortKey];
   }
-  //console.log(hashTable);
-  // console.log({ hashTable });
+
   return hashTable;
 };
 
@@ -89,16 +117,12 @@ function App() {
     if (checkPivotData()) {
       console.log("data ok in select");
       let filterdData = await formatChartsData(data, pivot);
-      //  console.log({ filterdData });
+      console.log({ filterdData });
       let filterdItems = await filterItemList(filterdData, pivot.pivotKey);
       setCurrentData(filterdData);
       setItemsNames(() => filterdItems);
       /*@ts-ignore */
-      let HashTable = await makeHashTable(
-        filterdData,
-        itemsNames,
-        pivot.pivotKey ? pivot.pivotKey : "פריט"
-      );
+      let HashTable = await makeHashTable(filterdData, itemsNames, pivot.pivotKey ? pivot.pivotKey : "פריט");
       setChartsData(HashTable);
     }
     // console.log("chart data ", chartsData);
@@ -119,6 +143,7 @@ function App() {
     if (name == "select") {
       console.log({ itemsNames });
       setPivot((prev) => ({ ...prev, pivotKey: chartsPivot[value] }));
+      console.log({ pivot });
     }
     console.log("select ", e.target.name);
     if (name == "end") setPivot((prev) => ({ ...prev, endingDate: value }));
@@ -131,8 +156,7 @@ function App() {
     console.log("e taerget ", e.target);
     let isPivotDataOk = checkPivotData();
     console.log({ isPivotDataOk });
-    if (e.target.name == "submit" && isPivotDataOk === false)
-      setVisible((prev) => !prev);
+    if (e.target.name == "submit" && isPivotDataOk === false) setVisible((prev) => !prev);
     else {
       setLoad(true);
       setLoad(await updateTable());
@@ -142,8 +166,7 @@ function App() {
       //  setChartsData(cData);
       console.log("data ok++");
     }
-    if (e.target?.id == "pop_up" || e.taerget?.id == "pop_up_text")
-      setVisible((prev) => !prev);
+    if (e.target?.id == "pop_up" || e.taerget?.id == "pop_up_text") setVisible((prev) => !prev);
   };
 
   return (
@@ -177,24 +200,18 @@ function App() {
           <thead className="bg-white border-b">
             <tr className="text-sm font-medium text-gray-900 px-6 py-4 text-left">
               {Object.keys(currentData[0]).map((header) => (
-                <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-                  {header}
-                </td>
+                <td className="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">{header}</td>
               ))}
             </tr>
           </thead>
           <tbody>
-            {currentData.map(
-              (row: { [s: string]: ReactNode } | ArrayLike<ReactNode>) => (
-                <tr className="bg-gray-100 border-b">
-                  {Object.values(row).map((cell) => (
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {cell}
-                    </td>
-                  ))}
-                </tr>
-              )
-            )}
+            {currentData.map((row: { [s: string]: ReactNode } | ArrayLike<ReactNode>) => (
+              <tr className="bg-gray-100 border-b">
+                {Object.values(row).map((cell) => (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{cell}</td>
+                ))}
+              </tr>
+            ))}
             <tr></tr>
           </tbody>
         </table>

@@ -2,6 +2,7 @@ export const chartsPivot: { [key: string]: string } = {
   לקוחות: "שם חשבון במסמך",
   פריטים: "פריט",
   "כרטיס מרכז": "שם חשבון הכנסות / הוצאות",
+  סוכן: "סוכן",
 };
 
 export type PivotData = {
