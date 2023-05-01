@@ -15,3 +15,11 @@ export type barChartProps = {
   hashTable: { [key: string]: any };
   // ...rest of your props
 };
+export type pieChartProps = {
+  hashTable: { [key: string]: any };
+  // ...rest of your props
+};
+export type unit = {
+  name: string;
+  sum: number;
+};

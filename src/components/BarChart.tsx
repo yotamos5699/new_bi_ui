@@ -1,43 +1,9 @@
 import { chartColors } from "../interfaces";
-import { barChartProps } from "../typing.d";
+import { barChartProps, unit } from "../typing.d";
 
 import React, { PureComponent } from "react";
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-type unit = {
-  name: string;
-  sum: number;
-};
-// const data = [
-//   {
-//     name: "XP100",
-//     sum: 600000,
-//   },
-//   {
-//     name: "SP250",
-//     sum: 3000,
-//   },
-//   {
-//     name: "KIMBO",
-//     sum: 200000,
-//   },
-//   {
-//     name: "AB260",
-//     sum: 140000,
-//   },
-//   {
-//     name: "SR",
-//     sum: 1000000,
-//   },
-//   {
-//     name: "SP",
-//     sum: 2390,
-//   },
-//   {
-//     name: "PP",
-//     sum: 600,
-//   },
-//   { name: "SX250SA", sum: 13370 },
-// ];
+
 const CastumBarChart: React.FC<barChartProps> = ({ hashTable }) => {
   let data: unit[] = [];
   Object.keys(hashTable).forEach((key) =>
@@ -52,8 +18,6 @@ const CastumBarChart: React.FC<barChartProps> = ({ hashTable }) => {
     <ResponsiveContainer width="100%" aspect={3}>
       {data.length > 1 ? (
         <BarChart
-          // width={500}
-          // height={300}
           data={data}
           margin={{
             top: 5,
@@ -61,8 +25,6 @@ const CastumBarChart: React.FC<barChartProps> = ({ hashTable }) => {
             left: 20,
             bottom: 5,
           }}
-
-          //  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />

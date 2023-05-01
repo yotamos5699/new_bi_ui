@@ -1,8 +1,8 @@
-import docsParams from "./defaultdocs.params.json";
-//import axios, { AxiosResponse } from "axios";
+import docsParams from "./jsonData/defaultdocs.params.json";
+import axios from "axios";
+const dataUrl = "https://bizbi-server.onrender.com/api/flexdoc";
 
-export async function getReportData() {
-  const body: string = JSON.stringify({});
+const fetchReportData = async (reportCod: any, parameters: any) => {
   const myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/json");
   myHeaders.append(
@@ -12,8 +12,8 @@ export async function getReportData() {
 
   const raw = JSON.stringify({
     TID: "4",
-    reportCod: docsParams.datafile,
-    parameters: docsParams.parameters,
+    reportCod: docsParams.sells.datafile,
+    parameters: docsParams.sells.parameters,
   });
 
   const requestOptions: object = {
@@ -23,23 +23,34 @@ export async function getReportData() {
     redirect: "follow",
   };
 
-  let dataUrl = "https://bizbi-server.onrender.com/api/flexdoc";
-  // let dataUrl = "http://localhost:3333/api/flexdoc";
-
   return await fetch(dataUrl, requestOptions)
-    .then((response) => {
-      console.log({ response });
-      return response.json();
-    })
-    .then((res) => {
-      console.log({ res });
-      return res;
-    })
-
+    .then((response) => response.json())
+    .then((res) => res.status.repdata)
     .catch((error) => console.log("error", error));
-  //doGet(res);
-}
+};
 
+export const getSellsData = async () => {
+  const reportCod = docsParams.sells.datafile;
+  const parameters = docsParams.sells.parameters;
+  return await fetchReportData(reportCod, parameters);
+};
+
+export const getTaxesData = async () => {
+  const reportCod = docsParams.taxes.datafile;
+  const parameters = docsParams.taxes.parameters;
+  return await fetchReportData(reportCod, parameters);
+};
 export const fetchData = (url: string) => {
   return fetch(url, { mode: "no-cors" }).then((res) => res.json());
 };
+export const getSpacielCastumers = async () =>
+  axios
+    .get(
+      "https://script.google.com/macros/s/AKfycbyfBt4Ueq6GAULew28xiJrl7T-dIfNDkNm1VZmAzLiD1MySjnTkP5icgtCARxNZ_wN4/exec?type=getcastumers",
+      { withCredentials: false }
+    )
+    .then((res) => {
+      console.log({ res });
+      return res.data;
+    })
+    .catch((error) => console.log("error", error));
