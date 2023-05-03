@@ -12,8 +12,8 @@ const fetchReportData = async (reportCod: any, parameters: any) => {
 
   const raw = JSON.stringify({
     TID: "4",
-    reportCod: docsParams.sells.datafile,
-    parameters: docsParams.sells.parameters,
+    reportCod: reportCod,
+    parameters: parameters,
   });
 
   const requestOptions: object = {
@@ -25,20 +25,27 @@ const fetchReportData = async (reportCod: any, parameters: any) => {
 
   return await fetch(dataUrl, requestOptions)
     .then((response) => response.json())
-    .then((res) => res.status.repdata)
+    .then((res) => {
+      console.log("res. in main !!", { res });
+      return res.status.repdata;
+    })
     .catch((error) => console.log("error", error));
 };
 
 export const getSellsData = async () => {
   const reportCod = docsParams.sells.datafile;
   const parameters = docsParams.sells.parameters;
-  return await fetchReportData(reportCod, parameters);
+  const sellsRes = await fetchReportData(reportCod, parameters);
+  console.log("sells res", { sellsRes });
+  return sellsRes;
 };
 
 export const getTaxesData = async () => {
   const reportCod = docsParams.taxes.datafile;
   const parameters = docsParams.taxes.parameters;
-  return await fetchReportData(reportCod, parameters);
+  const res = await fetchReportData(reportCod, parameters);
+  console.log("taxes res", { res });
+  return res;
 };
 export const fetchData = (url: string) => {
   return fetch(url, { mode: "no-cors" }).then((res) => res.json());
@@ -49,6 +56,17 @@ export const getSpacielCastumers = async () =>
       "https://script.google.com/macros/s/AKfycbyfBt4Ueq6GAULew28xiJrl7T-dIfNDkNm1VZmAzLiD1MySjnTkP5icgtCARxNZ_wN4/exec?type=getcastumers",
       { withCredentials: false }
     )
+    .then((res) => {
+      console.log({ res });
+      return res.data;
+    })
+    .catch((error) => console.log("error", error));
+
+export const getAddedTaxData = async () =>
+  axios
+    .get("https://script.google.com/macros/s/AKfycbxA__DGYQ90XUC9wDDLt6J8eRuVx-IXaexsal1wMf-VQJKguOzd3XPzo9UQuX3D_8ZE/exec", {
+      withCredentials: false,
+    })
     .then((res) => {
       console.log({ res });
       return res.data;
