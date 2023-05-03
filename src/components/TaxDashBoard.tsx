@@ -21,15 +21,17 @@ function TaxDashBoard({
 }) {
   console.log({ taxesData, sellsData });
   const [dashBoardData, setDashBoardData] = useState<any>();
+  const [summeryData, setSummeryData] = useState({ income: { neat: 0, tax: 0 }, expenses: { neat: 0, tax: 0 }, total: 0 });
   const addedData = useQuery({ queryKey: ["addedData"], queryFn: getAddedTaxData });
   useDashBoardData({ addedData, setDashBoardData, pivot, sellsData, taxesData, taxCounter });
   useEffect(() => {
-    if (dashBoardData) console.log({ dashBoardData });
+    if (dashBoardData) handleSummery({ setSummeryData, dashBoardData });
   }, [dashBoardData]);
 
   if (!addedData.data || !dashBoardData?.sells || !dashBoardData?.expenses) return <Speener loading={true} Color={null} />;
   return (
     <div className={"flex flex-col"}>
+      <Summery summeryData={summeryData} />
       <CastumBarChart hashTable={dashBoardData.sells} />
       <CastumBarChart hashTable={dashBoardData.expenses} />
     </div>
@@ -79,6 +81,81 @@ const useDashBoardData = ({
   }, [taxCounter]);
 };
 
+const handleSummery = ({
+  setSummeryData,
+  dashBoardData,
+}: {
+  setSummeryData: React.Dispatch<
+    React.SetStateAction<{
+      income: {
+        neat: number;
+        tax: number;
+      };
+      expenses: {
+        neat: number;
+        tax: number;
+      };
+      total: number;
+    }>
+  >;
+  dashBoardData: any;
+}) => {
+  const Income = Object.values(dashBoardData.sells).reduce((x1: any, x2: any) => x1 + x2);
+  const nIncome = typeof Income == "number" ? (Income / 117) * 100 : 0;
+  const Expenses = Object.values(dashBoardData.expenses).reduce((x1: any, x2: any) => x1 + x2);
+  const nExpenses = typeof Expenses == "number" ? (Expenses / 117) * 100 : 0;
+  setSummeryData({
+    income: { neat: nIncome, tax: nIncome * 0.17 },
+    expenses: { neat: nExpenses, tax: nExpenses * 0.17 },
+    total: nIncome * 0.17 + nExpenses * 0.17,
+  });
+};
+
+const Summery = ({
+  summeryData,
+}: {
+  summeryData: {
+    income: {
+      neat: number;
+      tax: number;
+    };
+    expenses: {
+      neat: number;
+      tax: number;
+    };
+    total: number;
+  };
+}) => {
+  return (
+    <div className="flex flex-col gap-1 text-white justify-center items-center">
+      <div className="flex flex-row-reverse gap-8">
+        <div className="flex flex-row-reverse gap-2">
+          <p>הכנסות</p>
+          <p>{summeryData.income.neat.toFixed(1)}</p>
+        </div>
+        <div className="flex flex-row-reverse gap-2">
+          <p>מע"מ</p>
+          <p>{summeryData.income.tax.toFixed(1)}</p>
+        </div>
+      </div>
+      <div className="flex flex-row-reverse gap-8">
+        <div className="flex flex-row-reverse gap-2">
+          <p>הוצאות</p>
+          <p>{summeryData.expenses.neat.toFixed(1)}</p>
+        </div>
+        <div className="flex flex-row-reverse gap-2">
+          <p>מע"מ</p>
+          <p>{summeryData.expenses.tax.toFixed(1)}</p>
+        </div>
+      </div>
+      <div className="flex flex-row-reverse gap-2">
+        <p>סה"כ</p>
+
+        <p>{summeryData.total.toFixed(1)}</p>
+      </div>
+    </div>
+  );
+};
 // 0
 // :
 // אסמכ'
