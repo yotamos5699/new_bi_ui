@@ -21,14 +21,29 @@ function TaxDashBoard({
 }) {
   console.log({ taxesData, sellsData });
   const [dashBoardData, setDashBoardData] = useState<any>();
-  const [summeryData, setSummeryData] = useState({ income: { neat: 0, tax: 0 }, expenses: { neat: 0, tax: 0 }, total: 0 });
-  const addedData = useQuery({ queryKey: ["addedData"], queryFn: getAddedTaxData });
-  useDashBoardData({ addedData, setDashBoardData, pivot, sellsData, taxesData, taxCounter });
+  const [summeryData, setSummeryData] = useState({
+    income: { neat: 0, tax: 0 },
+    expenses: { neat: 0, tax: 0 },
+    total: 0,
+  });
+  const addedData = useQuery({
+    queryKey: ["addedData"],
+    queryFn: getAddedTaxData,
+  });
+  useDashBoardData({
+    addedData,
+    setDashBoardData,
+    pivot,
+    sellsData,
+    taxesData,
+    taxCounter,
+  });
   useEffect(() => {
     if (dashBoardData) handleSummery({ setSummeryData, dashBoardData });
   }, [dashBoardData]);
 
-  if (!addedData.data || !dashBoardData?.sells || !dashBoardData?.expenses) return <Speener loading={true} Color={null} />;
+  if (!addedData.data || !dashBoardData?.sells || !dashBoardData?.expenses)
+    return <Speener loading={true} Color={null} />;
   return (
     <div className={"flex flex-col"}>
       <Summery summeryData={summeryData} />
@@ -44,9 +59,12 @@ const getAddedData = (addedData: any[], startDate: any, endDate: any) => {
   let addedSells;
   let addedExpanses;
   for (let i = 0; i <= addedData.length - 1; i++) {
-    if (addedData[i]["תאריך"] < startDate || addedData[i]["תאריך"] > endDate) continue;
-    if (addedData[i]["סוג"] == "הוצאות") addedExpanses += addedData[i]["סכום כולל"];
-    if (addedData[i]["סוג"] == "הכנסות") addedSells += addedData[i]["סכום כולל"];
+    if (addedData[i]["תאריך"] < startDate || addedData[i]["תאריך"] > endDate)
+      continue;
+    if (addedData[i]["סוג"] == "הוצאות")
+      addedExpanses += addedData[i]["סכום כולל"];
+    if (addedData[i]["סוג"] == "הכנסות")
+      addedSells += addedData[i]["סכום כולל"];
   }
   return { addedSells, addedExpanses };
 };
@@ -68,9 +86,20 @@ const useDashBoardData = ({
 }) => {
   useEffect(() => {
     const getData = async () => {
-      const { addedSells, addedExpanses } = getAddedData(addedData.data, pivot.startinDate, pivot.endingDate);
-      const sellsRes = (await updateTable(sellsData, { ...pivot, pivotKey: "שם חשבון הכנסות / הוצאות" })).data;
-      const taxesRes = (await updateTable(taxesData, { ...pivot, pivotKey: "שם חשבון חובה" })).data;
+      const { addedSells, addedExpanses } = getAddedData(
+        addedData.data,
+        pivot.startinDate,
+        pivot.endingDate
+      );
+      const sellsRes = (
+        await updateTable(sellsData, {
+          ...pivot,
+          pivotKey: "שם חשבון הכנסות / הוצאות",
+        })
+      ).data;
+      const taxesRes = (
+        await updateTable(taxesData, { ...pivot, pivotKey: "שם חשבון חובה" })
+      ).data;
       if (addedSells && sellsRes) sellsRes["הכנסות נוספות"] = addedSells;
       if (addedExpanses && taxesRes) taxesRes["הוצאות נוספות"] = addedExpanses;
       setDashBoardData({ sells: { ...sellsRes }, expenses: { ...taxesRes } });
@@ -100,10 +129,14 @@ const handleSummery = ({
   >;
   dashBoardData: any;
 }) => {
-  const Income = Object.values(dashBoardData.sells).reduce((x1: any, x2: any) => x1 + x2);
-  const nIncome = typeof Income == "number" ? (Income / 117) * 100 : 0;
-  const Expenses = Object.values(dashBoardData.expenses).reduce((x1: any, x2: any) => x1 + x2);
-  const nExpenses = typeof Expenses == "number" ? (Expenses / 117) * 100 : 0;
+  const Income = Object.values(dashBoardData.sells).reduce(
+    (x1: any, x2: any) => x1 + x2
+  );
+  const nIncome = typeof Income == "number" ? Income : 0;
+  const Expenses = Object.values(dashBoardData.expenses).reduce(
+    (x1: any, x2: any) => x1 + x2
+  );
+  const nExpenses = typeof Expenses == "number" ? Expenses : 0;
   setSummeryData({
     income: { neat: nIncome, tax: nIncome * 0.17 },
     expenses: { neat: nExpenses, tax: nExpenses * 0.17 },
