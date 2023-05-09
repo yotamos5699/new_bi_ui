@@ -49,18 +49,32 @@ function Nav({
   return (
     <div className="">
       <div className="flex flex-row-reverse gap-4 justify-center">
-        {dataType != "מע'מ" && <Select handleSelect={handleSelect} setPivot={setPivot} pivot={pivot} />}
+        {dataType != "מע'מ" && dataType != "רוא'ח" && (
+          <Select
+            handleSelect={handleSelect}
+            setPivot={setPivot}
+            pivot={pivot}
+          />
+        )}
 
         <div className="flex flex-col">
-          <label className="flex text-white justify-center mb-1">תאריך התחלה</label>
+          <label className="flex text-white justify-center mb-1">
+            תאריך התחלה
+          </label>
           <input name="start" type="date" onChange={handleSelect} />
         </div>
         <div className="flex flex-col">
-          <label className="flex text-white justify-center mb-1">תאריך סיום</label>
+          <label className="flex text-white justify-center mb-1">
+            תאריך סיום
+          </label>
           <input name="end" type="date" onChange={handleSelect} />
         </div>
         <div className="flex flex-col">
-          <Select handleSelect={handleSelect} pivot={["סטטיסטיקה", "מע'מ"]} isTax={true} />
+          <Select
+            handleSelect={handleSelect}
+            pivot={["סטטיסטיקה", "מע'מ", "רוא'ח"]}
+            isTax={true}
+          />
 
           <button
             name="submit"
@@ -71,7 +85,7 @@ function Nav({
           </button>
         </div>
       </div>
-      {dataType != "מע'מ" && (
+      {dataType != "מע'מ" && dataType != "רוא'ח" && (
         <div className="flex flex-row-reverse justify-center gap-4">
           <div className="flex flex-col border-2 border-gray-400 px-2">
             <label className="text-white">שקיבלו הזמנות</label>
@@ -79,7 +93,9 @@ function Nav({
               checked={checked.all}
               name="all"
               type="checkbox"
-              onChange={(e) => handleChecked(e.target.name, setChecked, checked, setCurrentKey)}
+              onChange={(e) =>
+                handleChecked(e.target.name, setChecked, checked, setCurrentKey)
+              }
             />
           </div>
           <div className="flex flex-col border-2 border-gray-400 px-2">
@@ -88,7 +104,9 @@ function Nav({
               checked={checked.pro}
               name="pro"
               type="checkbox"
-              onChange={(e) => handleChecked(e.target.name, setChecked, checked, setCurrentKey)}
+              onChange={(e) =>
+                handleChecked(e.target.name, setChecked, checked, setCurrentKey)
+              }
             />
           </div>
           <div className="flex flex-col border-2 border-gray-400 px-2">
@@ -97,7 +115,9 @@ function Nav({
               checked={checked.regular}
               name="regular"
               type="checkbox"
-              onChange={(e) => handleChecked(e.target.name, setChecked, checked, setCurrentKey)}
+              onChange={(e) =>
+                handleChecked(e.target.name, setChecked, checked, setCurrentKey)
+              }
             />
           </div>
           <div className=" flex flex-col justify-center gap-2">
@@ -110,7 +130,11 @@ function Nav({
                   name="bar"
                   type="checkbox"
                   onChange={(e) =>
-                    setSelectedGraph((prev: any) => ({ ...prev, [e.target.name]: !prev[e.target.name as keyof typeof prev] }))
+                    setSelectedGraph((prev: any) => ({
+                      ...prev,
+                      [e.target.name]:
+                        !prev[e.target.name as keyof typeof prev],
+                    }))
                   }
                 />
               </div>
@@ -121,7 +145,11 @@ function Nav({
                   name="pie"
                   type="checkbox"
                   onChange={(e) =>
-                    setSelectedGraph((prev: any) => ({ ...prev, [e.target.name]: !prev[e.target.name as keyof typeof prev] }))
+                    setSelectedGraph((prev: any) => ({
+                      ...prev,
+                      [e.target.name]:
+                        !prev[e.target.name as keyof typeof prev],
+                    }))
                   }
                 />
               </div>

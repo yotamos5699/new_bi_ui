@@ -4,7 +4,12 @@ import CastumBarChart from "./components/BarChart";
 import Model from "./components/Model";
 import Select from "./components/Select";
 
-import { getSellsData, getSpacielCastumers, getTaxesData } from "./tempApi";
+import {
+  getAccountisData,
+  getSellsData,
+  getSpacielCastumers,
+  getTaxesData,
+} from "./tempApi";
 import { PivotData, chartsPivot } from "./typing.d";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import PieChart_ from "./components/PieChart";
@@ -34,9 +39,16 @@ const castuner_agent = [
 
 function App() {
   const [sellsData, setSellsData] = useState<any[] | null>(null);
-  const [selectedGraph, setSelectedGraph] = useState({ bar: false, pie: false });
+  const [selectedGraph, setSelectedGraph] = useState({
+    bar: false,
+    pie: false,
+  });
 
-  const [checked, setChecked] = useState({ pro: false, regular: false, all: false });
+  const [checked, setChecked] = useState({
+    pro: false,
+    regular: false,
+    all: false,
+  });
   const [currentKey, setCurrentKey] = useState<null | string>(null);
   const [taxesData, setTaxesData] = useState<any[] | null>(null);
   const [spacielCastumers, setSpacielCastumers] = useState<any[] | null>(null);
@@ -81,10 +93,15 @@ function App() {
       setTaxCounter((prev) => prev + 1);
       return;
     }
-    if (e.target.name == "submit" && isPivotDataOk === false) setVisible((prev) => !prev);
+    if (e.target.name == "submit" && isPivotDataOk === false)
+      setVisible((prev) => !prev);
     else if (e.target.name == "submit" && sellsData && spacielCastumers) {
       setLoad(true);
-      const checkedData = await filterRelevantCastumers(sellsData, spacielCastumers, currentKey);
+      const checkedData = await filterRelevantCastumers(
+        sellsData,
+        spacielCastumers,
+        currentKey
+      );
       if ((currentKey && !checkedData) || checkedData?.length == 0) {
         setError({ show: true, message: " מחזיר מידע מלא ,אין שורות להציג" });
         setVisible((prev) => !prev);
@@ -93,7 +110,10 @@ function App() {
       }
       console.log({ data2Update });
       setLoad(true);
-      const { isLoading, data, items, CurrentData } = await updateTable(data2Update ?? sellsData, pivot);
+      const { isLoading, data, items, CurrentData } = await updateTable(
+        data2Update ?? sellsData,
+        pivot
+      );
       setChartsData(data);
       setItemsNames(items);
       setCurrentData(CurrentData);
@@ -103,7 +123,8 @@ function App() {
       setVisible((prev) => !prev);
     }
   };
-  if (!sellsData || !spacielCastumers) return <Speener loading={true} Color={null} />;
+  if (!sellsData || !spacielCastumers)
+    return <Speener loading={true} Color={null} />;
 
   return (
     <div className="flex flex-col w-full h-full gap-2">
@@ -122,7 +143,14 @@ function App() {
       />
       {!load ? (
         dataType == "מע'מ" && taxesData && sellsData ? (
-          <TaxDashBoard sellsData={sellsData} taxesData={taxesData} pivot={pivot} taxCounter={taxCounter} />
+          <TaxDashBoard
+            sellsData={sellsData}
+            taxesData={taxesData}
+            pivot={pivot}
+            taxCounter={taxCounter}
+          />
+        ) : dataType == "רוא'ח" ? (
+          <AccountisData />
         ) : (
           <div className="flex flex-col h-full">
             {selectedGraph.bar && <CastumBarChart hashTable={chartsData} />}
@@ -138,18 +166,24 @@ function App() {
             <thead className="bg-gray-800 ">
               <tr className="text-sm font-medium border-2 border-gray-200 text-gray-400 px-6 py-4 text-left">
                 {Object.keys(currentData[0]).map((header) => (
-                  <td className="text-sm text-gray-400 font-light px-6 py-4 whitespace-nowrap">{header}</td>
+                  <td className="text-sm text-gray-400 font-light px-6 py-4 whitespace-nowrap">
+                    {header}
+                  </td>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {currentData.map((row: { [s: string]: ReactNode } | ArrayLike<ReactNode>) => (
-                <tr className="bg-gray-600 border-b">
-                  {Object.values(row).map((cell) => (
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">{cell}</td>
-                  ))}
-                </tr>
-              ))}
+              {currentData.map(
+                (row: { [s: string]: ReactNode } | ArrayLike<ReactNode>) => (
+                  <tr className="bg-gray-600 border-b">
+                    {Object.values(row).map((cell) => (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                )
+              )}
               <tr></tr>
             </tbody>
           </table>
@@ -164,6 +198,27 @@ function App() {
 
 export default App;
 
+const AccountisData = () => {
+  const data = useQuery({ queryKey: ["accountis"], queryFn: getAccountisData });
+  if (data.error) return <h1>error...</h1>;
+  if (data.isLoading) return <Speener loading={true} Color={null} />;
+  return (
+    <div className="flex flex-col text-white justify-center gap-2">
+      {data.data &&
+        data.data.map((row: any) => (
+          <div className="flex  flex-row-reverse gap-4">
+            {Object.keys(row).map((key) => (
+              <p className="flex flex-row-reverse gap-2">
+                <span>{key}</span>
+                <span>{row[key]}</span>
+              </p>
+            ))}
+          </div>
+        ))}
+    </div>
+  );
+};
+
 const useGetQueryData = (
   setSellsData: React.Dispatch<React.SetStateAction<any[] | null>>,
   setTaxesData: React.Dispatch<React.SetStateAction<any[] | null>>,
@@ -171,7 +226,10 @@ const useGetQueryData = (
 ) => {
   const sellsData = useQuery({ queryKey: ["sells"], queryFn: getSellsData });
   const taxesData = useQuery({ queryKey: ["tax"], queryFn: getTaxesData });
-  const spacielCastumers = useQuery({ queryKey: ["sc"], queryFn: getSpacielCastumers });
+  const spacielCastumers = useQuery({
+    queryKey: ["sc"],
+    queryFn: getSpacielCastumers,
+  });
 
   useEffect(() => {
     if (taxesData.data) {
@@ -205,27 +263,41 @@ const handleChecked = (
 ) => {
   let newObj: any = {};
   let keys = Object.keys(checked);
-  keys.forEach((key: string) => (key == name ? (newObj[key] = !checked[key as keyof typeof checked]) : (newObj[key] = false)));
+  keys.forEach((key: string) =>
+    key == name
+      ? (newObj[key] = !checked[key as keyof typeof checked])
+      : (newObj[key] = false)
+  );
   setChecked({ ...newObj });
   const res = Object.entries(newObj).filter((row) => row[1] == true)[0];
   const key = res ? res[0] : null;
   setCurrentKey(key);
 };
 export type HandleCheackedType = typeof handleChecked;
-const filterRelevantCastumers = async (data: any[], castumers: any[], key: string | null): Promise<any[] | null> => {
+const filterRelevantCastumers = async (
+  data: any[],
+  castumers: any[],
+  key: string | null
+): Promise<any[] | null> => {
   console.log({ data, castumers, key });
 
   let proList: string[] = [];
   let regularList: string[] = [];
   let allList: string[] = [];
-  castumers.forEach((castumer) => (castumer.pro ? proList.push(castumer.key) : regularList.push(castumer.key)));
+  castumers.forEach((castumer) =>
+    castumer.pro ? proList.push(castumer.key) : regularList.push(castumer.key)
+  );
   allList = [...proList, ...regularList];
 
   const hashList = { all: allList, pro: proList, regular: regularList };
   return new Promise((resolve, reject) => {
     if (!key) resolve(null);
     else {
-      const newData = data.filter((row) => hashList[key as keyof typeof hashList].find((element) => element == row["לקוח/ספק"]));
+      const newData = data.filter((row) =>
+        hashList[key as keyof typeof hashList].find(
+          (element) => element == row["לקוח/ספק"]
+        )
+      );
       console.log({ newData });
       resolve(newData);
     }

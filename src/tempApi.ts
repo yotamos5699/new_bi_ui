@@ -62,11 +62,26 @@ export const getSpacielCastumers = async () =>
     })
     .catch((error) => console.log("error", error));
 
+export const getAccountisData = async () =>
+  axios
+    .get(
+      "https://script.google.com/macros/s/AKfycbxA__DGYQ90XUC9wDDLt6J8eRuVx-IXaexsal1wMf-VQJKguOzd3XPzo9UQuX3D_8ZE/exec?type=accountis",
+      { withCredentials: false }
+    )
+    .then((res) => {
+      console.log({ res });
+      return res.data;
+    })
+    .catch((error) => console.log("error", error));
+
 export const getAddedTaxData = async () =>
   axios
-    .get("https://script.google.com/macros/s/AKfycbxA__DGYQ90XUC9wDDLt6J8eRuVx-IXaexsal1wMf-VQJKguOzd3XPzo9UQuX3D_8ZE/exec", {
-      withCredentials: false,
-    })
+    .get(
+      "https://script.google.com/macros/s/AKfycbxA__DGYQ90XUC9wDDLt6J8eRuVx-IXaexsal1wMf-VQJKguOzd3XPzo9UQuX3D_8ZE/exec",
+      {
+        withCredentials: false,
+      }
+    )
     .then((res) => {
       console.log({ res });
       return res.data;

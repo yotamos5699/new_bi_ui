@@ -5,7 +5,10 @@ const formatChartsData = async (data: any, pivotData: PivotData) => {
   let filtedData: any = [];
   if (!pivotData.endingDate || !pivotData.startinDate) return;
   for (let i = 0; i <= data.length - 1; i++) {
-    let dateString = pivotData.pivotKey == "שם חשבון חובה" ? data[i]["ת.אסמכ"] : data[i]["תאריך"];
+    let dateString =
+      pivotData.pivotKey == "שם חשבון חובה"
+        ? data[i]["ת.אסמכ"]
+        : data[i]["תאריך"];
 
     let thisDate = new Date(dateString).getTime();
     let END_TIME = new Date(pivotData.endingDate).getTime();
@@ -16,7 +19,8 @@ const formatChartsData = async (data: any, pivotData: PivotData) => {
         filtedData.push(data[i]);
       } else {
         let currentCard = data[i]["לקוח/ספק"];
-        if (currentCard > "6024" && currentCard < "7000") filtedData.push(data[i]);
+        if (currentCard > "6024" && currentCard < "7000")
+          filtedData.push(data[i]);
       }
     }
   }
@@ -24,14 +28,23 @@ const formatChartsData = async (data: any, pivotData: PivotData) => {
   return filtedData;
 };
 
-export const makeHashTable = async (FilterdData: any, keys: any, key: string | "פריט") => {
+export const makeHashTable = async (
+  FilterdData: any,
+  keys: any,
+  key: string | "פריט"
+) => {
   let hashTable: { [key: string]: number } = {};
 
   for (let i = 0; i <= keys.length - 1; i++) {
     hashTable[keys[i]] = 0;
   }
 
-  let sortKey = key == "סוכן" ? "כמות מקורית" : key == "שם חשבון חובה" ? "סה&quot;כ שקל בתנועה" : "סה&quot;כ בתנועה";
+  let sortKey =
+    key == "סוכן"
+      ? "כמות מקורית"
+      : key == "שם חשבון חובה"
+      ? "סה&quot;כ שקל בתנועה"
+      : "סה&quot;כ בתנועה";
   for (let i = 0; i <= FilterdData.length - 1; i++) {
     hashTable[FilterdData[i][key]] += -FilterdData[i][sortKey];
   }
@@ -61,7 +74,11 @@ export const updateTable = async (data: any[], pivot: any) => {
     cData = filterdData;
     fItems = filterdItems;
     fData = filterdData;
-    let HashTable = await makeHashTable(filterdData, filterdItems, pivot.pivotKey ? pivot.pivotKey : "פריט");
+    let HashTable = await makeHashTable(
+      filterdData,
+      filterdItems,
+      pivot.pivotKey ? pivot.pivotKey : "פריט"
+    );
     fData = HashTable;
   }
 
