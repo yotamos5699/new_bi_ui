@@ -2,7 +2,7 @@ import React from "react";
 import Select from "./Select";
 import { PivotData } from "../typing";
 import { HandleCheackedType } from "../App";
-
+// sdsd
 function Nav({
   handleClick,
   setPivot,
